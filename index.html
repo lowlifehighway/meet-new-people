@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Random Person Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0f172a;
+        color: #e5e7eb;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .dashboard {
+        background: #020617;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 900px;
+        min-height: 500px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      .card {
+        background: #020617;
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 16px;
+      }
+      #person {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        text-align: center;
+      }
+      #person img {
+        width: 100%;
+        aspect-ratio: 1/1;
+        border-radius: 100%;
+      }
+      #movie {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        grid-row: span 2;
+      }
+      #movie img {
+        width: 90%;
+        margin: 0 auto;
+        border-radius: 10px;
+      }
+      h2,
+      h3 {
+        margin: 10px 0;
+      }
+
+      button {
+        grid-column: 1/-1;
+        padding: 12px;
+        height: 56px;
+        border: none;
+        border-radius: 8px;
+        background: #38bdf8;
+        font-size: large;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #0ea5e9;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="dashboard">
+      <div class="card" id="person"></div>
+      <div class="card" id="movie"></div>
+      <div class="card" id="trivia"></div>
+      <button onclick="loadDashboard()">Meet someone new</button>
+    </div>
+
+    <script>
+      const TMDB_KEY = '08529bbfc37b448994e38cfdf56dee95';
+      const vowels = ['a', 'e', 'i', 'o', 'u'];
+
+      async function loadRickandMortyCharacter() {
+        const randomId = Math.floor(Math.random() * 826) + 1;
+
+        const res = await fetch(
+          `https://rickandmortyapi.com/api/character/${randomId}`,
+        );
+        const character = await res.json();
+        document.getElementById('person').innerHTML = `
+        <img src="${character.image}" />
+        <h2>Hi, i'm ${character.name}</h2>
+        <p>I am ${vowels.includes(character.species[0].toLowerCase()) ? 'an' : 'a'} ${character.species} from ${character.origin.name}</p>
+      `;
+      }
+      async function loadTrivia() {
+        const res = await fetch(
+          'https://opentdb.com/api.php?amount=1&type=multiple',
+        );
+        const data = await res.json();
+        const trivia = data.results[0];
+
+        document.getElementById('trivia').innerHTML = `
+        <h3>Trivia</h3>
+        <p>My favorite trivia question is</p>
+        <p>${trivia.question}</p>
+      `;
+      }
+      async function loadMovie() {
+        const res = await fetch(
+          `https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`,
+        );
+        const data = await res.json();
+
+        const movie =
+          data.results[Math.floor(Math.random() * data.results.length)];
+        document.getElementById('movie').innerHTML = `
+        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" />
+        <div class="">
+        <h3>${movie.title}</h3>
+        <p>${movie.overview}</p>
+        </div>
+      `;
+      }
+      async function loadDashboard() {
+        await Promise.all([
+          loadRickandMortyCharacter(),
+          loadTrivia(),
+          loadMovie(),
+        ]);
+      }
+      loadDashboard();
+    </script>
+  </body>
+</html>
